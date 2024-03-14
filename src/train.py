@@ -12,9 +12,27 @@ from data.dataset import OEMDataLoader, OEMDataset
 from torch.utils.data import DataLoader
 from lightning.pytorch.loggers import NeptuneLogger
 
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.getenv('NEPTUNE_API')
+
 if __name__ == '__main__':
     model = LitUNet()
     oem = OEMDataLoader()
+
+    neptune_logger = NeptuneLogger(
+    project="gillan/lulc",
+    # api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIxNmRkMjQ3YS1iMzlkLTRjMGUtYmY2OS1iYzBiM2E3NmI3NWYifQ==",
+    api_key=api_key,
+    log_model_checkpoints=False
+    )
+    # trainer = pl.Trainer(fast_dev_run=True)
+    trainer = pl.Trainer(overfit_batches=1, logger=neptune_logger)
+    # trainer = pl.Trainer(logger=neptune_logger)
+
+    trainer.fit(model=model, datamodule=oem)
+
+
 
     # DATA_DIR = 'data/processing'
         
@@ -33,14 +51,4 @@ if __name__ == '__main__':
 
     # train_loader = DataLoader(OEM_train, batch_size=batch_size)
     # val_loader = DataLoader(OEM_val, batch_size=batch_size)
-
-    neptune_logger = NeptuneLogger(
-    project="gillan/lulc",
-    api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIxNmRkMjQ3YS1iMzlkLTRjMGUtYmY2OS1iYzBiM2E3NmI3NWYifQ==",
-    log_model_checkpoints=False
-    )
-    # trainer = pl.Trainer(fast_dev_run=True)
-    trainer = pl.Trainer(overfit_batches=1, logger=neptune_logger)
-    # trainer = pl.Trainer(logger=neptune_logger)
-    trainer.fit(model=model, datamodule=oem)
     # trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
