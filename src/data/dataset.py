@@ -69,7 +69,7 @@ class OEMDataset(Dataset):
         return len(self.fn_imgs)
 
 class OEMDataLoader(LightningDataModule):
-    def __init__(self, batch_size: int=16):
+    def __init__(self, batch_size: int=8):
         super().__init__()
         self.DATA_DIR = 'data/processing'
         
