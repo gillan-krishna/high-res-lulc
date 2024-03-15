@@ -1,22 +1,31 @@
 import lightning as pl
 import segmentation_models_pytorch as smp
+
 # from src.losses import JaccardLoss
 from losses import JaccardLoss, FocalLoss
 from metrics import fscore
 import neptune
 
 import torch
+
+
 class LitUNet(pl.LightningModule):
     def __init__(self):
         super().__init__()
         self.save_hyperparameters()
-        self.model = smp.Unet(encoder_name='efficientnet-b0', encoder_weights='imagenet', in_channels=3, classes=9, activation='softmax')
+        self.model = smp.Unet(
+            encoder_name="efficientnet-b0",
+            encoder_weights="imagenet",
+            in_channels=3,
+            classes=9,
+            activation="softmax",
+        )
         self.loss_fn = JaccardLoss()
         # self.train_step_loss = []
         # self.val_step_loss = []
         # self.train_step_fs = []
         # self.val_step_fs = []
-        
+
     def training_step(self, batch, batch_idx):
         x, y = batch
         x_hat = self.model(x)
@@ -27,7 +36,7 @@ class LitUNet(pl.LightningModule):
         # self.train_step_loss.extend(loss)
         # self.train_step_fs.extend(fs)
         return loss
-    
+
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x_hat = self.model(x)
@@ -43,4 +52,3 @@ class LitUNet(pl.LightningModule):
         # sourcery skip: inline-immediately-returned-variable
         optimizer = torch.optim.Adam(self.parameters(), lr=3e-3)
         return optimizer
-    

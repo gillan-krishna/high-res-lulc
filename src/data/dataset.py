@@ -10,12 +10,14 @@ from lightning import LightningDataModule
 from pathlib import Path
 import segmentation_models_pytorch as smp
 
+
 def to_categorical(y, num_classes):
-    """ 1-hot encodes a tensor """
-    return np.eye(num_classes, dtype='uint8')[y]
+    """1-hot encodes a tensor"""
+    return np.eye(num_classes, dtype="uint8")[y]
+
 
 def preprocess_fn(data, to_tensor, preprocess_input, num_classes):
-    data['image'] = preprocess_input(np.array(data['image'], dtype='uint8'))
+    data["image"] = preprocess_input(np.array(data["image"], dtype="uint8"))
     # data['mask'] = to_categorical(np.array(data['mask'],dtype='uint8'), num_classes=num_classes)
     data = to_tensor(
         {
@@ -25,6 +27,7 @@ def preprocess_fn(data, to_tensor, preprocess_input, num_classes):
     )
     return data
 
+
 class OEMDataset(Dataset):
     def __init__(self, img_list: list, n_classes: int = 9, testing=False, augm=None):
         self.fn_imgs = [str(f) for f in img_list]
@@ -33,7 +36,7 @@ class OEMDataset(Dataset):
         self.testing = testing
         self.classes = np.arange(n_classes).tolist()
         self.to_tensor = transforms.ToTensor(classes=self.classes)
-        self.preprocess_input = smp.encoders.get_preprocessing_fn('efficientnet-b0')
+        self.preprocess_input = smp.encoders.get_preprocessing_fn("efficientnet-b0")
         self.N_CLASSES = n_classes
 
     def __getitem__(self, idx):
@@ -55,7 +58,9 @@ class OEMDataset(Dataset):
                 msk = msk.resize((2**power_w, 2**power_h), resample=Image.NEAREST)
             data = {"image": img, "mask": msk}
 
-        data = preprocess_fn(data, self.to_tensor, self.preprocess_input, self.N_CLASSES)
+        data = preprocess_fn(
+            data, self.to_tensor, self.preprocess_input, self.N_CLASSES
+        )
         # data = self.to_tensor(
         #     {
         #         "image": np.array(data["image"], dtype="uint8"),
@@ -68,27 +73,45 @@ class OEMDataset(Dataset):
     def __len__(self):
         return len(self.fn_imgs)
 
+
 class OEMDataLoader(LightningDataModule):
-    def __init__(self, batch_size: int=8):
+    def __init__(self, batch_size: int = 8):
         super().__init__()
-        self.DATA_DIR = 'data/processing'
-        
-        self.TRAIN_LIST = os.path.join(self.DATA_DIR,'train.txt')
-        self.VAL_LIST = os.path.join(self.DATA_DIR, 'val.txt')
-        self.TEST_LIST = os.path.join(self.DATA_DIR, 'test.txt')
-        
-        fns = [f for f in Path(self.DATA_DIR).rglob('*png') if '/images/' in str(f)]
-        self.train_list = [str(f) for f in fns if '_'.join(f.name.split('_')[:-2])+'.tif' in np.loadtxt(self.TRAIN_LIST, dtype =str)]
-        self.val_list = [str(f) for f in fns if '_'.join(f.name.split('_')[:-2])+'.tif' in np.loadtxt(self.VAL_LIST, dtype =str)]
-        self.test_list = [str(f) for f in fns if '_'.join(f.name.split('_')[:-2])+'.tif' in np.loadtxt(self.TEST_LIST, dtype =str)]
+        self.DATA_DIR = "data/processing"
+
+        self.TRAIN_LIST = os.path.join(self.DATA_DIR, "train.txt")
+        self.VAL_LIST = os.path.join(self.DATA_DIR, "val.txt")
+        self.TEST_LIST = os.path.join(self.DATA_DIR, "test.txt")
+
+        fns = [f for f in Path(self.DATA_DIR).rglob("*png") if "/images/" in str(f)]
+        self.train_list = [
+            str(f)
+            for f in fns
+            if "_".join(f.name.split("_")[:-2]) + ".tif"
+            in np.loadtxt(self.TRAIN_LIST, dtype=str)
+        ]
+        self.val_list = [
+            str(f)
+            for f in fns
+            if "_".join(f.name.split("_")[:-2]) + ".tif"
+            in np.loadtxt(self.VAL_LIST, dtype=str)
+        ]
+        self.test_list = [
+            str(f)
+            for f in fns
+            if "_".join(f.name.split("_")[:-2]) + ".tif"
+            in np.loadtxt(self.TEST_LIST, dtype=str)
+        ]
         self.batch_size = batch_size
-    
-    def setup(self, stage:str):
-        if stage == 'fit':
-            self.OEM_train = OEMDataset(img_list= self.train_list , testing=False, augm=None)
-            self.OEM_val = OEMDataset(img_list= self.val_list , testing=False, augm=None)
-        elif stage == 'test':
-            self.OEM_test = OEMDataset(img_list= self.test_list , testing=True, augm=None)
+
+    def setup(self, stage: str):
+        if stage == "fit":
+            self.OEM_train = OEMDataset(
+                img_list=self.train_list, testing=False, augm=None
+            )
+            self.OEM_val = OEMDataset(img_list=self.val_list, testing=False, augm=None)
+        elif stage == "test":
+            self.OEM_test = OEMDataset(img_list=self.test_list, testing=True, augm=None)
 
     def train_dataloader(self):
         return DataLoader(self.OEM_train, batch_size=self.batch_size)

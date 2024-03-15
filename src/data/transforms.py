@@ -1,6 +1,7 @@
 import numpy as np
 import torchvision.transforms.functional as TF
 
+
 class ToTensor:
     def __init__(self, classes):
         self.classes = classes
