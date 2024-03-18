@@ -11,12 +11,17 @@ from pathlib import Path
 import segmentation_models_pytorch as smp
 
 
+
 def to_categorical(y, num_classes):
+    """1-hot encodes a tensor"""
+    return np.eye(num_classes, dtype="uint8")[y]
+
     """1-hot encodes a tensor"""
     return np.eye(num_classes, dtype="uint8")[y]
 
 
 def preprocess_fn(data, to_tensor, preprocess_input, num_classes):
+    data["image"] = preprocess_input(np.array(data["image"], dtype="uint8"))
     data["image"] = preprocess_input(np.array(data["image"], dtype="uint8"))
     # data['mask'] = to_categorical(np.array(data['mask'],dtype='uint8'), num_classes=num_classes)
     data = to_tensor(
@@ -28,6 +33,7 @@ def preprocess_fn(data, to_tensor, preprocess_input, num_classes):
     return data
 
 
+
 class OEMDataset(Dataset):
     def __init__(self, img_list: list, n_classes: int = 9, testing=False, augm=None):
         self.fn_imgs = [str(f) for f in img_list]
@@ -36,6 +42,7 @@ class OEMDataset(Dataset):
         self.testing = testing
         self.classes = np.arange(n_classes).tolist()
         self.to_tensor = transforms.ToTensor(classes=self.classes)
+        self.preprocess_input = smp.encoders.get_preprocessing_fn("efficientnet-b0")
         self.preprocess_input = smp.encoders.get_preprocessing_fn("efficientnet-b0")
         self.N_CLASSES = n_classes
 
@@ -61,6 +68,9 @@ class OEMDataset(Dataset):
         data = preprocess_fn(
             data, self.to_tensor, self.preprocess_input, self.N_CLASSES
         )
+        data = preprocess_fn(
+            data, self.to_tensor, self.preprocess_input, self.N_CLASSES
+        )
         # data = self.to_tensor(
         #     {
         #         "image": np.array(data["image"], dtype="uint8"),
@@ -74,9 +84,11 @@ class OEMDataset(Dataset):
         return len(self.fn_imgs)
 
 
+
 class OEMDataLoader(LightningDataModule):
-    def __init__(self, batch_size: int = 8):
+    def __init__(self, batch_size):
         super().__init__()
+        self.save_hyperparameters()
         self.DATA_DIR = "data/processing"
 
         self.TRAIN_LIST = os.path.join(self.DATA_DIR, "train.txt")
@@ -113,8 +125,17 @@ class OEMDataLoader(LightningDataModule):
         elif stage == "test":
             self.OEM_test = OEMDataset(img_list=self.test_list, testing=True, augm=None)
 
+    def setup(self, stage: str):
+        if stage == "fit":
+            self.OEM_train = OEMDataset(
+                img_list=self.train_list, testing=False, augm=None
+            )
+            self.OEM_val = OEMDataset(img_list=self.val_list, testing=False, augm=None)
+        elif stage == "test":
+            self.OEM_test = OEMDataset(img_list=self.test_list, testing=True, augm=None)
+
     def train_dataloader(self):
-        return DataLoader(self.OEM_train, batch_size=self.batch_size)
+        return DataLoader(self.OEM_train, batch_size=self.batch_size, pin_memory=True, num_workers=6)
 
     def val_dataloader(self):
-        return DataLoader(self.OEM_val, batch_size=self.batch_size)
+        return DataLoader(self.OEM_val, batch_size=self.batch_size, pin_memory=True, num_workers=6)

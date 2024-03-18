@@ -166,3 +166,4 @@ notebooks/*
 lightning_logs/*
 .neptune/*
 mlruns/*
+models/*
