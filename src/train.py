@@ -15,9 +15,9 @@ from torch.utils.data import DataLoader
 # from lightning.pytorch.loggers import NeptuneLogger
 from lightning.pytorch.loggers import MLFlowLogger
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 # api_key = os.getenv("NEPTUNE_API")
 # api_key = os.environ('NEPTUNE_API')
 
