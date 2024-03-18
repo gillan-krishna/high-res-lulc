@@ -55,6 +55,7 @@ class LitUNet(pl.LightningModule):
         self.log("train/fscore", fs, prog_bar=True, on_step=False, on_epoch=True)
         return loss
 
+
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x_hat = self.model(x)
@@ -68,4 +69,3 @@ class LitUNet(pl.LightningModule):
         # sourcery skip: inline-immediately-returned-variable
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
-    
