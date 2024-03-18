@@ -3,11 +3,11 @@ import argparse
 import numpy as np
 import rasterio
 from pathlib import Path
+
 # from PIL import Image
 from skimage.io import imread
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--path_to_OpenEarthMap",
@@ -30,11 +30,13 @@ if __name__ == "__main__":
         if "/images/" in str(f) and f.name.endswith("pre_disaster.tif")
     ]
     xbd_fullimgs = np.asarray(xbd_fullimgs)
-    xbd_missing = np.loadtxt(os.path.join(OEMDIR, "xbd_files.csv"), dtype=str, delimiter=",")
+    xbd_missing = np.loadtxt(
+        os.path.join(OEMDIR, "xbd_files.csv"), dtype=str, delimiter=","
+    )
 
     print(len(xbd_missing))
     for f1, f2 in xbd_missing:
-        f1 = f1.replace('.png', '.tif')
+        f1 = f1.replace(".png", ".tif")
         idx = np.where(xbd_fullimgs[:, 0] == f1)[0]
 
         dir = xbd_fullimgs[idx, 1][0]

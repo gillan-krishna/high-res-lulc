@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import metrics
 
+
 class JaccardLoss(nn.Module):
     def __init__(self, class_weights=1.0):
         super().__init__()
@@ -16,7 +17,8 @@ class JaccardLoss(nn.Module):
             ygt = target[:, i, :, :]
             losses += 1 - metrics.fscore(ypr, ygt)
         return losses
-    
+
+
 class FocalLoss(nn.Module):
     def __init__(self, alpha=1, gamma=2, class_weights=None, reduction="mean"):
         super().__init__()

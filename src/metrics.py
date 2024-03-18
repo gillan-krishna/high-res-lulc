@@ -1,7 +1,9 @@
 import torch
 
+
 def _threshold(x, threshold=None):
     return (x > threshold).type(x.dtype) if threshold is not None else x
+
 
 def fscore(pr, gt, beta=1, eps=1e-7, threshold=None):
     # sourcery skip: inline-immediately-returned-variable
