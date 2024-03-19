@@ -5,17 +5,25 @@ from losses import JaccardLoss, FocalLoss
 from metrics import fscore
 
 import torch
-torch.set_float32_matmul_precision('medium')
+
+torch.set_float32_matmul_precision("medium")
+
 
 class LitUNet(pl.LightningModule):
-    def __init__(self, arch:str='unetplusplus', encoder_name:str='efficientnet-b3', attention:str=False, lr=3e-3):
+    def __init__(
+        self,
+        arch: str = "unetplusplus",
+        encoder_name: str = "efficientnet-b3",
+        attention: str = False,
+        lr=3e-3,
+    ):
         super().__init__()
         self.save_hyperparameters()
         if attention:
-            attention_type = 'scse'
+            attention_type = "scse"
         else:
             attention_type = None
-        if arch == 'unet':
+        if arch == "unet":
             self.model = smp.Unet(
                 encoder_name=encoder_name,
                 encoder_weights="imagenet",
@@ -24,7 +32,7 @@ class LitUNet(pl.LightningModule):
                 activation="softmax",
                 decoder_attention_type=attention_type,
             )
-        elif arch == 'unetplusplus':
+        elif arch == "unetplusplus":
             self.model = smp.UnetPlusPlus(
                 encoder_name=encoder_name,
                 encoder_weights="imagenet",
@@ -55,7 +63,6 @@ class LitUNet(pl.LightningModule):
         self.log("train/fscore", fs, prog_bar=True, on_step=False, on_epoch=True)
         return loss
 
-
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x_hat = self.model(x)
@@ -63,7 +70,8 @@ class LitUNet(pl.LightningModule):
         fs = fscore(x_hat, y)
         self.log("val/loss", loss, prog_bar=True, on_step=False, on_epoch=True)
         self.log("val/fscore", fs, prog_bar=True, on_step=False, on_epoch=True)
-        return loss
+        del loss
+        # return loss
 
     def configure_optimizers(self):
         # sourcery skip: inline-immediately-returned-variable
