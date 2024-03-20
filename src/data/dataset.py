@@ -63,14 +63,8 @@ class OEMDataset(Dataset):
         data = preprocess_fn(
             data, self.to_tensor, self.preprocess_input, self.N_CLASSES
         )
-        # data = self.to_tensor(
-        #     {
-        #         "image": np.array(data["image"], dtype="uint8"),
-        #         "mask": np.array(data["mask"], dtype="uint8"),
-        #     }
-        # )
-        # return data["image"], data["mask"], self.fn_imgs[idx]
-        del msk, img
+
+        del msk, img, power_h, power_w
         return data["image"], data["mask"]
 
     def __len__(self):

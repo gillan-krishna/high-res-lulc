@@ -14,6 +14,7 @@ from data.dataset import OEMDataLoader, OEMDataset
 from torch.utils.data import DataLoader
 
 from lightning.pytorch.loggers import NeptuneLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 # from lightning.pytorch.loggers import MLFlowLogger
 from lightning.pytorch.tuner.tuning import Tuner
@@ -22,9 +23,9 @@ from pathlib import Path
 if __name__ == "__main__":
     pl.seed_everything(42, workers=True)
     model = LitUNet(
-        arch="unetplusplus", encoder_name="efficientnet-b0", attention=False, lr=0.04
+        arch="unetplusplus", encoder_name="efficientnet-b4", attention=False, lr=3e-4
     )
-    oem = OEMDataLoader(batch_size=32)
+    oem = OEMDataLoader(batch_size=16)
 
     # mlf_logger = MLFlowLogger(experiment_name="lulc_b3")
     neptune_logger = NeptuneLogger(
@@ -34,6 +35,17 @@ if __name__ == "__main__":
     )
 
     checkpoint_dir = Path("/home/ubuntu/hrl/high-res-lulc/models")
+    # DEFAULTS used by the Trainer
+    checkpoint_callback = ModelCheckpoint(
+        dirpath=checkpoint_dir,
+        # filename= f'{epoch}-{train/loss}-{other_metric}
+        save_top_k=2,
+        save_weights_only=True,
+        verbose=True,
+        monitor='train/loss',
+        mode='min',
+        # prefix='lulc'
+    )
 
     # trainer = pl.Trainer(fast_dev_run=True, accelerator='gpu', deterministic=True)
     # trainer = pl.Trainer(overfit_batches=1, logger=mlf_logger, accelerator='gpu', deterministic=True)
@@ -42,9 +54,11 @@ if __name__ == "__main__":
         accelerator="gpu",
         default_root_dir=checkpoint_dir,
         deterministic=True,
-        precision=16,
+        # precision=16,
         profiler="pytorch",
-        accumulate_grad_batches=8,
+        accumulate_grad_batches=4,
+        callbacks=checkpoint_callback,
+        enable_checkpointing=True
     )
     # tuner = Tuner(trainer=trainer)
     # tuner.scale_batch_size(model=model, datamodule=oem)

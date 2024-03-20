@@ -59,8 +59,8 @@ class LitUNet(pl.LightningModule):
         x_hat = self.model(x)
         loss = self.loss_fn(x_hat, y)
         fs = fscore(x_hat, y)
-        self.log("train/loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("train/fscore", fs, prog_bar=True, on_step=False, on_epoch=True)
+        self.log("train/loss", loss.detach(), prog_bar=True, on_step=False, on_epoch=True)
+        self.log("train/fscore", fs.detach(), prog_bar=True, on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -68,10 +68,9 @@ class LitUNet(pl.LightningModule):
         x_hat = self.model(x)
         loss = self.loss_fn(x_hat, y)
         fs = fscore(x_hat, y)
-        self.log("val/loss", loss, prog_bar=True, on_step=False, on_epoch=True)
-        self.log("val/fscore", fs, prog_bar=True, on_step=False, on_epoch=True)
-        del loss
-        # return loss
+        self.log("val/loss", loss.detach(), prog_bar=True, on_step=False, on_epoch=True)
+        self.log("val/fscore", fs.detach(), prog_bar=True, on_step=False, on_epoch=True)
+        return loss
 
     def configure_optimizers(self):
         # sourcery skip: inline-immediately-returned-variable
