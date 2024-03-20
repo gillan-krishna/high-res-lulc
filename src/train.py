@@ -36,16 +36,16 @@ if __name__ == "__main__":
 
     checkpoint_dir = Path("/home/ubuntu/hrl/high-res-lulc/models")
     # DEFAULTS used by the Trainer
-    checkpoint_callback = ModelCheckpoint(
-        dirpath=checkpoint_dir,
-        # filename= f'{epoch}-{train/loss}-{other_metric}
-        save_top_k=2,
-        save_weights_only=True,
-        verbose=True,
-        monitor='train/loss',
-        mode='min',
-        # prefix='lulc'
-    )
+    # checkpoint_callback = ModelCheckpoint(
+    #     dirpath=checkpoint_dir,
+    #     # filename= f'{epoch}-{train/loss}-{other_metric}
+    #     save_top_k=2,
+    #     save_weights_only=True,
+    #     verbose=True,
+    #     monitor='train/loss',
+    #     mode='min',
+    #     # prefix='lulc'
+    # )
 
     # trainer = pl.Trainer(fast_dev_run=True, accelerator='gpu', deterministic=True)
     # trainer = pl.Trainer(overfit_batches=1, logger=mlf_logger, accelerator='gpu', deterministic=True)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         # precision=16,
         profiler="pytorch",
         accumulate_grad_batches=4,
-        callbacks=checkpoint_callback,
+        # callbacks=checkpoint_callback,
         enable_checkpointing=True
     )
     # tuner = Tuner(trainer=trainer)
