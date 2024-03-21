@@ -1,4 +1,5 @@
 import os
+from lightning.pytorch.utilities.types import EVAL_DATALOADERS
 import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
@@ -37,8 +38,8 @@ class OEMDataset(Dataset):
         self.testing = testing
         self.classes = np.arange(n_classes).tolist()
         self.to_tensor = transforms.ToTensor(classes=self.classes)
-        self.preprocess_input = smp.encoders.get_preprocessing_fn("efficientnet-b0")
-        self.preprocess_input = smp.encoders.get_preprocessing_fn("efficientnet-b0")
+        self.preprocess_input = smp.encoders.get_preprocessing_fn("efficientnet-b4")
+        self.preprocess_input = smp.encoders.get_preprocessing_fn("efficientnet-b4")
         self.N_CLASSES = n_classes
 
     def __getitem__(self, idx):
@@ -110,9 +111,14 @@ class OEMDataLoader(LightningDataModule):
             self.OEM_val = OEMDataset(img_list=self.val_list, testing=False, augm=None)
         elif stage == "test":
             self.OEM_test = OEMDataset(img_list=self.test_list, testing=True, augm=None)
+        elif stage == "predict":
+            self.OEM_pred = OEMDataset(img_list=self.val_list, testing=False, augm=None)
 
     def train_dataloader(self):
         return DataLoader(self.OEM_train, batch_size=self.batch_size)
 
     def val_dataloader(self):
         return DataLoader(self.OEM_val, batch_size=self.batch_size)
+    
+    def predict_dataloader(self):
+        return DataLoader(self.OEM_pred, batch_size=1)

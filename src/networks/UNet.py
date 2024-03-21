@@ -53,6 +53,9 @@ class LitUNet(pl.LightningModule):
 
         self.loss_fn = JaccardLoss()
         self.lr = lr
+    
+    def forward(self,x):
+        return self.model(x)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -71,6 +74,11 @@ class LitUNet(pl.LightningModule):
         self.log("val/loss", loss.detach(), prog_bar=True, on_step=False, on_epoch=True)
         self.log("val/fscore", fs.detach(), prog_bar=True, on_step=False, on_epoch=True)
         return loss
+    
+    def predict_step(self, batch, batch_idx):
+        x, y = batch
+        
+        return self(x)
 
     def configure_optimizers(self):
         # sourcery skip: inline-immediately-returned-variable
