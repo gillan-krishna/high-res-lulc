@@ -167,3 +167,4 @@ lightning_logs/*
 .neptune/*
 mlruns/*
 models/*
+src/lightning_logs/*
