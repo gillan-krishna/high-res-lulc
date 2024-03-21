@@ -45,8 +45,8 @@ if __name__ == "__main__":
         # precision=16,
         profiler="pytorch",
         accumulate_grad_batches=4,
-        # callbacks=checkpoint_callback,
+        # callbacks=checkpoint_callback,yo
         enable_checkpointing=True,
     )
     
-    trainer.fit(model=model, datamodule=oem, ckpt_path='/home/ubuntu/hrl/high-res-lulc/.neptune/Untitled/LUL-47/checkpoints/epoch=66-step=39195.ckpt')
+    trainer.fit(model=model, datamodule=oem, ckpt_path='/home/ubuntu/hrl/high-res-lulc/.neptune/Untitled/LUL-52/checkpoints/epoch=90-step=48555.ckpt')

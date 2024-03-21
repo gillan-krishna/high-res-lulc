@@ -84,7 +84,8 @@ class LitUNet(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         preds = torch.argmax(softmax(input=y_hat, dim=1), dim=1).permute(1,2,0).cpu().numpy()
-        return preds
+        true = torch.argmax(y, dim=1).permute(1,2,0).cpu().numpy()
+        return preds, true
 
     def configure_optimizers(self):
         # sourcery skip: inline-immediately-returned-variable
