@@ -25,7 +25,7 @@ if __name__ == "__main__":
     model = LitUNet(
         arch="unetplusplus", encoder_name="efficientnet-b4", attention=False, lr=3e-4
     )
-    oem = OEMDataLoader(batch_size=24)
+    oem = OEMDataLoader(batch_size=24, num_classes=9)
 
     neptune_logger = NeptuneLogger(
         project="gillan/lulc",
