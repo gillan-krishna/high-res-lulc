@@ -1,6 +1,4 @@
 import warnings
-
-
 warnings.filterwarnings("ignore")
 
 import os
@@ -49,4 +47,4 @@ if __name__ == "__main__":
         enable_checkpointing=True,
     )
     
-    trainer.fit(model=model, datamodule=oem, ckpt_path='/home/ubuntu/hrl/high-res-lulc/.neptune/Untitled/LUL-52/checkpoints/epoch=90-step=48555.ckpt')
+    trainer.fit(model=model, datamodule=oem)#, ckpt_path='/home/ubuntu/hrl/high-res-lulc/.neptune/Untitled/LUL-52/checkpoints/epoch=90-step=48555.ckpt')
