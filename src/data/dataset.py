@@ -1,6 +1,4 @@
 import os
-from lightning.pytorch.utilities.types import EVAL_DATALOADERS
-import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 from . import transforms
@@ -10,7 +8,7 @@ import math
 from lightning import LightningDataModule
 from pathlib import Path
 import segmentation_models_pytorch as smp
-
+from torchvision.transforms import v2
 
 def to_categorical(y, num_classes):
     """1-hot encodes a tensor"""
@@ -73,7 +71,7 @@ class OEMDataset(Dataset):
 
 
 class OEMDataLoader(LightningDataModule):
-    def __init__(self, batch_size):
+    def __init__(self, batch_size, num_classes):
         super().__init__()
         self.save_hyperparameters()
         self.DATA_DIR = "data/processing"
@@ -102,6 +100,7 @@ class OEMDataLoader(LightningDataModule):
             in np.loadtxt(self.TEST_LIST, dtype=str)
         ]
         self.batch_size = batch_size
+        self.cutmix = v2.CutMix(num_classes=num_classes)
 
     def setup(self, stage: str):
         if stage == "fit":
@@ -115,7 +114,7 @@ class OEMDataLoader(LightningDataModule):
             self.OEM_pred = OEMDataset(img_list=self.val_list, testing=False, augm=None)
 
     def train_dataloader(self):
-        return DataLoader(self.OEM_train, batch_size=self.batch_size)
+        return DataLoader(self.OEM_train, batch_size=self.batch_size, collate_fn=self.cutmix, shuffle=True)
 
     def val_dataloader(self):
         return DataLoader(self.OEM_val, batch_size=self.batch_size)
